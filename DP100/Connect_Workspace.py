@@ -4,6 +4,7 @@ import os
 from azure.ai.ml import MLClient
 from azure.ai.ml.entities import Workspace
 from azure.identity import DefaultAzureCredential , InteractiveBrowserCredential,ClientSecretCredential
+from azure.ai.ml import command
 
 os.system('cls')
 
@@ -23,29 +24,33 @@ _ClientSecretCredential = ClientSecretCredential(
     client_secret=secret_id
 )
 
-
 ml_client = MLClient(
     credential=_ClientSecretCredential, 
     subscription_id=subscription_id, 
     resource_group_name=resource_group
 )
 
-workspace = Workspace(
-    name=workspace_name,
-    location="centralindia",  # Or your desired Azure region
-    description="My new Azure ML workspace",
-    tags={"project": "my_ml_project"},
-    display_name="My ML Workspace",
-    hbi_workspace=False, # Set to True for High Business Impact data
-)
 
-# Create the workspace
-#purge if exists
-try:
-    ml_client.workspaces.begin_delete(name=workspace_name,permanently_delete=True,delete_dependent_resources=True).wait()
-except:
-    pass
+# # configure job
+# job = command(
+#     code="./src",
+#     command="python train.py",
+#     environment="AzureML-sklearn-0.24-ubuntu18.04-py37-cpu@latest",
+#     compute="aml-cluster",
+#     experiment_name="train-model"
+# )
 
-ml_client.workspaces
-ws_result = ml_client.workspaces.begin_create(workspace).result()
-print(f"Workspace created: {ws_result.name}")
+# connect to workspace and submit job
+_workSpace = ml_client.workspaces.get(workspace_name)
+print("="*100)
+print(_workSpace.display_name)
+print(_workSpace.location)
+print(_workSpace.storage_account)
+print(_workSpace.application_insights)
+print(_workSpace.key_vault)
+print(_workSpace.container_registry)
+
+
+
+print("="*100)
+
